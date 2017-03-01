@@ -138,7 +138,7 @@ class ServiceCommand extends Command
 
         $msg .= '<p style="border: 1px solid red; background-color: #cccccc; font-size: 12px; padding: 10px;">';
         foreach($info AS $data) {
-            $msg .= $data["timestamp"].' CODE:'.$data["status_code"].' ERROR: '.$data["last_error"].' TIMEOUT:'.$data["time_out"].'<br>';
+            $msg .= $data["timestamp"].' CODE: '.$data["status_code"].' ERROR: '.$data["last_error"].' TIMEOUT: '.$data["time_out"].'<br>';
         }
         $msg .= '</p>';
 
