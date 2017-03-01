@@ -40,6 +40,7 @@ class HttpClient {
 
     private $timeout = 5;
     private $answer = 0;
+    private $start_time = 0;
 
     private $_error;
 
@@ -92,6 +93,11 @@ class HttpClient {
     }
 
     public function get_answer_time() {
+
+        if(!$this->answer && $this->start_time) {
+            $this->answer = round(microtime(true) - $this->start_time, 2);
+        }
+
         return $this->answer;
     }
     public function remove_header($k) {
@@ -179,7 +185,7 @@ class HttpClient {
     //发送请求
     private function send($method,$data='') {
 
-        $_start_time = microtime(true);
+        $this->start_time = microtime(true);
 
         $matches = parse_url($this->_require_uri);
         !isset($matches['host']) && $matches['host'] = '';
@@ -309,7 +315,7 @@ class HttpClient {
         $this->_response_body = implode("\r\n\r\n",$arr);
         socket_close($sock);
         $this->_error = null;
-        $this->answer = round(microtime(true) - $_start_time, 2);
+        $this->answer = round(microtime(true) - $this->start_time, 2);
     }
 
     private function create_header() {
