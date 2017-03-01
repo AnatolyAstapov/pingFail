@@ -261,7 +261,7 @@ class HttpClient {
             }
 
         }else {
-            if(!socket_connect($sock,$host,$port)) {
+            if(!@socket_connect($sock,$host,$port)) {
                 $this->_error = "Cann't connect to {$host}:{$port}";
                 return false;
             }
@@ -288,7 +288,6 @@ class HttpClient {
         }
         $arr = explode("\r\n\r\n",$recv);
 
-        //处理报头
         $heads = explode("\r\n",array_shift($arr));
 
         foreach($heads as $line){
@@ -307,7 +306,6 @@ class HttpClient {
                 if(count($header) == 2) $this->_response_header[$header[0]] = trim($header[1]);
             }
         }
-        //报文
         $this->_response_body = implode("\r\n\r\n",$arr);
         socket_close($sock);
         $this->_error = null;
