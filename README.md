@@ -1,5 +1,5 @@
-# pingFail
-php service for monitoring sites status
+# Ping Fail
+### php service for monitoring sites status, ping site, email notification
 
 Наблосал для себя небольшой сервис на php который мониторит состояние сайтов.
 Пока отправляет только почту, где пишет когда упал и когда поднялся.
@@ -29,10 +29,14 @@ autorestart=true
 stderr_logfile=/var/www/pingFail/logs/error.log
 stdout_logfile=/var/www/pingFail/logs/out.log
 ```
+restart supervisor service 
 ```service supervisor restart```
 
+open supervisor console
 ``` sudo supervisorctl ```
+restart task
 ``` restart all ```
+quit from supervisor
 ``` quit ```
 
 
