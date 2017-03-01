@@ -101,7 +101,8 @@ class Monitoring {
                 array_push($this->info, [
                     "timestamp" => date("d-m-y H:i:s"),
                     "last_error" => $this->http->getError(),
-                    "status_code" => $this->http->get_status()
+                    "status_code" => $this->http->get_status(),
+                    "time_out" => $this->http->get_answer_time()
                 ]);
             }
 
