@@ -9,6 +9,7 @@ exp:
 /var/www/pingFail/bin/run.php service
 
 or use supervisor
+
 create /etc/supervisor/conf.d/ping_fail.conf
 
 config:
