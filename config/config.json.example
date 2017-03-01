@@ -1,0 +1,34 @@
+{
+  "smtp_host": "smtp.mailtrap.io",
+  "smtp_port": 2525,
+  "smtp_user": "XXXXXXXXXXXXX",
+  "smtp_paswd": "XXXXXXXXXXXX",
+  "viber_api_key": "XXXXXXXXX",
+  "resources" : [
+    {
+      "name": "Site name 1",
+      "site": "https://google.com",
+      "timeout": 1,
+      "notification":
+        {
+          "emails": [
+            "you_email1@gmail.com",
+            "you_email2@gmail.com"
+          ]
+        }
+
+    },
+    {
+      "name": "Site name 2",
+      "site": "https://ya.ru",
+      "timeout": 5,
+      "notification":
+        {
+          "emails": [
+            "you_email1@gmail.com",
+            "you_email2@gmail.com"
+          ]
+        }
+    }
+  ]
+}
