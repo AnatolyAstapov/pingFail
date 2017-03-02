@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+ini_set('memory_limit', '512M');
+
 define("ROOT", __DIR__."/../");
 
 if (!$loader = include __DIR__ . '/../vendor/autoload.php') {
