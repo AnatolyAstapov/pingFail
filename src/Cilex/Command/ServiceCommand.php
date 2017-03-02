@@ -157,7 +157,7 @@ class ServiceCommand extends Command
             if(isset($this->config->smtp_user) && !empty($this->config->smtp_user)) {
                 $Mailer->setAuth($this->config->smtp_user, $this->config->smtp_paswd);
             }
-                //$Mailer->setFrom('PingFail', 'ping.fail@ping-fail.com')
+                $Mailer->setFrom('PingFail', 'ping.fail@ping-fail.com');
                 $Mailer->addTo(null, $email)
                 ->setSubject("Site ".$resource->name." is " .($status ? "UP" : "DOWN") )
                 ->setBody($msg)
