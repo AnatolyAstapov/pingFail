@@ -14,7 +14,13 @@
           "emails": [
             "you_email1@gmail.com",
             "you_email2@gmail.com"
-          ]
+          ],
+          "slacks": [
+              {
+                "hook": "https://hooks.slack.com/services/XXXXXXXX/XXXXXXXX/xxxxxxxxxxxxxxxxxxx",
+                "channel": "#general"
+              }
+            ]
         }
 
     },

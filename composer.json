@@ -21,7 +21,8 @@
         "symfony/finder":                 "~2.1",
         "cilex/console-service-provider": "1.*",
         "monolog/monolog": "^1.22",
-        "txthinking/mailer": "^1.4"
+        "txthinking/mailer": "^1.4",
+        "maknz/slack": "^1.7"
     },
 
     "require-dev" : {

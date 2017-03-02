@@ -12,6 +12,7 @@
 namespace Cilex\Command;
 
 use Cilex\Components\HttpClient;
+use Maknz\Slack\Client;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,9 +26,19 @@ use Tx\Mailer;
 class ServiceCommand extends Command
 {
 
+    /**
+     * @var \DateTime
+     */
     private $start_service_time;
+
+    /**
+     * @var \stdClass
+     */
     private $config;
 
+    /**
+     * @var resource
+     */
     private $dump;
 
     /**
@@ -72,7 +83,6 @@ class ServiceCommand extends Command
             throw new \Exception("Site not found");
         }
 
-
         while(true) {
 
             foreach($this->config->resources AS $resource) {
@@ -108,8 +118,6 @@ class ServiceCommand extends Command
             sleep(10);
         }
 
-
-
         $output->writeln("Service stop at ".date("d-m-y H:i:s"));
     }
 
@@ -121,6 +129,95 @@ class ServiceCommand extends Command
      */
     private function sendNotify($status, $resource, array $info) {
 
+        /**
+         * SEND MAILS
+         */
+
+        try {
+            $this->sendMail($status, $resource, $info);
+        } catch (\Exception $exception) {
+            //@TODO
+        }
+
+
+        /**
+         * Send to SLack
+         */
+        try {
+            $this->sendToSlack($status, $resource, $info);
+        } catch (\Exception $exception) {
+            //@TODO
+        }
+    }
+
+    /**
+     * @param $status
+     * @param $resource
+     * @param array $info
+     */
+    private function sendToSlack($status, $resource, array $info) {
+
+        if(!isset($resource->notification->slacks)) {
+            return;
+        }
+        foreach($resource->notification->slacks AS $slack) {
+
+            if(!$slack->hook) {
+                continue;
+            }
+
+            $settings = [
+                'username' => 'PingFail',
+                'channel' => $slack->channel ? $slack->channel : "#general",
+                'link_names' => true
+            ];
+
+            $Slack  = new Client($slack->hook, $settings);
+
+            if(!$status) {
+                $data = [
+                    'fallback' => 'Current server stats',
+                    'text' => "You site  ".$resource->name." [". $resource->site ."] is DOWN at ".date("d-m-Y H:i:s"),
+                    'color' => 'danger',
+                    'fields' => []
+                ];
+
+            } else {
+
+
+                $up_date = new \DateTime(end($info)["timestamp"]);
+                $down_time = $up_date->diff(new \DateTime($info[0]["timestamp"]));
+
+                $data = [
+                    'fallback' => 'Current server stats',
+                    'text' => "You site ".$resource->name." [". $resource->site ."] is UP at ".date("d-m-Y H:i:s")." after ".$down_time->format("%H:%I:%S"). " inactivity",
+                    'color' => 'danger',
+                    'fields' => []
+                ];
+
+            }
+
+            /*foreach($info AS $row) {
+                array_push($data["fields"], [
+                    'title' => $row["timestamp"],
+                    'value' => 'CODE: '.$row["status_code"].' ERROR: '.$row["last_error"]. " TIMEOUT: ".$row["time_out"],
+                    'short' => true
+                ]);
+            }*/
+
+            $Slack->to($slack->channel ? $slack->channel : "#general")
+                ->attach($data)
+                ->send('New alert from the monitoring system');
+
+        }
+    }
+
+    /**
+     * @param $status
+     * @param $resource
+     * @param array $info
+     */
+    private function sendMail($status, $resource, array $info) {
         $msg = '<h3>Hi dude!</h3>';
         $msg .= "<p>You site  ".$resource->name." [". $resource->site ."] is ";
 
@@ -157,14 +254,13 @@ class ServiceCommand extends Command
             if(isset($this->config->smtp_user) && !empty($this->config->smtp_user)) {
                 $Mailer->setAuth($this->config->smtp_user, $this->config->smtp_paswd);
             }
-                $Mailer->setFrom('PingFail', 'ping.fail@ping-fail.com');
-                $Mailer->addTo(null, $email)
+            $Mailer->setFrom('PingFail', 'ping.fail@ping-fail.com');
+            $Mailer->addTo(null, $email)
                 ->setSubject("Site ".$resource->name." is " .($status ? "UP" : "DOWN") )
                 ->setBody($msg)
                 ->send();
 
         }
-
 
     }
 }
