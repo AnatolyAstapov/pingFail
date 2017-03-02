@@ -153,10 +153,12 @@ class ServiceCommand extends Command
 
         foreach($resource->notification->emails AS $email) {
             $Mailer = new Mailer();
-            $Mailer->setServer($this->config->smtp_host, $this->config->smtp_port)
-                ->setAuth($this->config->smtp_user, $this->config->smtp_paswd)
-                ->setFrom('PingFail', 'ping.fail@ping-fail.com')
-                ->addTo(null, $email)
+            $Mailer = $Mailer->setServer($this->config->smtp_host, $this->config->smtp_port);
+            if(isset($this->config->smtp_user) && !empty($this->config->smtp_user)) {
+                $Mailer->setAuth($this->config->smtp_user, $this->config->smtp_paswd);
+            }
+                //$Mailer->setFrom('PingFail', 'ping.fail@ping-fail.com')
+                $Mailer->addTo(null, $email)
                 ->setSubject("Site ".$resource->name." is " .($status ? "UP" : "DOWN") )
                 ->setBody($msg)
                 ->send();
