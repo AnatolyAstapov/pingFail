@@ -188,6 +188,10 @@ class ServiceCommand extends Command
                 $up_date = new \DateTime(end($info)["timestamp"]);
                 $down_time = $up_date->diff(new \DateTime($info[0]["timestamp"]));
 
+                if($down_time->format("%H:%I:%S") == "00:00:00") {
+                    continue;
+                }
+
                 $data = [
                     'fallback' => 'Current server stats',
                     'text' => "You site ".$resource->name." [". $resource->site ."] is UP at ".date("d-m-Y H:i:s")." after ".$down_time->format("%H:%I:%S"). " inactivity",

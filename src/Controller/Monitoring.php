@@ -89,7 +89,7 @@ class Monitoring {
      */
     public function run(){
 
-        for($i=2; $i != 0; $i--) {
+        for($i=0; $i < 3; $i++) {
 
             $this->http->set_header('User-Agent','Mozilla/5.0 (Windows NT 5.1; rv:13.0) Gecko/20100101 Firefox/13.0.1');
             $this->http->get($this->site);
