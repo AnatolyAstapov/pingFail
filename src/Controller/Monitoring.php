@@ -115,9 +115,13 @@ class Monitoring {
                         "status_code" => $this->http->get_status(),
                         "time_out" => $this->http->get_answer_time()
                     ]);
+                } else {
+                    $this->status = true;
+                    return true;
                 }
 
                 $this->status = true;
+
             }
 
             sleep(2);
