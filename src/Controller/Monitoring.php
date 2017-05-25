@@ -95,6 +95,7 @@ class Monitoring {
             $this->http->get($this->site);
 
             $this->log->log($this->site. " Status: ".$this->http->get_status(). " | ex.time:".$this->http->get_answer_time()." | error: ".$this->http->getError());
+            $this->log->log(PHP_EOL.$this->http->get_body().PHP_EOL);
 
             if($this->http->get_status() >= 400 || $this->http->get_status() <= 0) {
                 $this->status = false;
