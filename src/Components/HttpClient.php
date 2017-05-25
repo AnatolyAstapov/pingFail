@@ -313,6 +313,16 @@ class HttpClient {
             }
         }
         $this->_response_body = implode("\r\n\r\n",$arr);
+
+        try {
+            $data = json_decode($this->_response_body);
+            if(isset($data->error_description)) {
+                $this->_error = $data->error_description;
+            }
+        } catch (\Exception $exception) {
+
+        }
+
         socket_close($sock);
         $this->_error = null;
         $this->answer = round(microtime(true) - $this->start_time, 2);

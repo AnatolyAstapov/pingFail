@@ -96,7 +96,7 @@ class Monitoring {
 
             $this->log->log("Status: ".$this->http->get_status(). " | ex.time:".$this->http->get_answer_time()." | error: ".$this->http->getError());
 
-            if($this->http->get_status() >= 500 || $this->http->get_status() <= 0) {
+            if($this->http->get_status() >= 400 || $this->http->get_status() <= 0) {
                 $this->status = false;
                 array_push($this->info, [
                     "timestamp" => date("d-m-y H:i:s"),
@@ -106,7 +106,7 @@ class Monitoring {
                 ]);
             }
 
-            if($this->http->get_status() < 500 && $this->http->get_status() > 0) {
+            if($this->http->get_status() < 400 && $this->http->get_status() > 0) {
 
                 if(!$this->status) {
                     array_push($this->info, [

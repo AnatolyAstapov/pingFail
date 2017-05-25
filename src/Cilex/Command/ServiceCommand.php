@@ -174,12 +174,19 @@ class ServiceCommand extends Command
 
             $Slack  = new Client($slack->hook, $settings);
 
+            $last_error = (string) @end($info)["last_error"];
+
             if(!$status) {
                 $data = [
                     'fallback' => 'Current server stats',
                     'text' => "You site  ".$resource->name." [". $resource->site ."] is DOWN at ".date("d-m-Y H:i:s"),
                     'color' => 'danger',
-                    'fields' => []
+                    'fields' => [
+                        [
+                            'title' => 'last error',
+                            'value' => $last_error
+                        ],
+                    ]
                 ];
 
             } else {
