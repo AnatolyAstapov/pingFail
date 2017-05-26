@@ -164,10 +164,10 @@ class HttpClient {
     //初始化请求数据
     private function init_require() {
         $this->_require_header = array(
-            'Accept'=>'Accept: */*',
-            'Accept-Language'=>'zh-cn',
-            'User-Agent'=>'Mozilla/5.0 (Windows; U; Windows NT 5.1; zh-CN; rv:1.9.2.3) Gecko/20100401 Firefox/3.6.3',
-            'Connection'=>'close');
+            'Accept'=>'Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Language'=>'ru-RU,ru;q=0.8,en-US;q=0.6,en;q=0.4,de;q=0.2,uk;q=0.2',
+            'User-Agent'=>'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36',
+            'Connection'=>'keep-alive');
         $this->_require_cookie = array();
     }
 
@@ -182,12 +182,62 @@ class HttpClient {
         }
     }
 
+
+    public function get_web_page( $url )
+    {
+        $options = array(
+            CURLOPT_RETURNTRANSFER => true,     // return web page
+            CURLOPT_HEADER         => false,    // don't return headers
+            CURLOPT_FOLLOWLOCATION => true,     // follow redirects
+            CURLOPT_ENCODING       => "",       // handle all encodings
+            CURLOPT_USERAGENT      => "pingFail", // who am i
+            CURLOPT_AUTOREFERER    => true,     // set referer on redirect
+            CURLOPT_CONNECTTIMEOUT => $this->timeout,      // timeout on connect
+            CURLOPT_TIMEOUT        => $this->timeout,      // timeout on response
+            CURLOPT_MAXREDIRS      => 10,       // stop after 10 redirects
+            CURLOPT_SSL_VERIFYPEER => false     // Disabled SSL Cert checks
+        );
+
+        $ch      = curl_init( $url );
+        curl_setopt_array( $ch, $options );
+        $content = curl_exec( $ch );
+        $err     = curl_errno( $ch );
+        $errmsg  = curl_error( $ch );
+        $header  = curl_getinfo( $ch );
+        $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close( $ch );
+
+        $header['errno']   = $err;
+        $this->_error = $errmsg;
+
+        $this->_response_status = $httpcode;
+        $this->_response_time = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
+
+
+        try {
+
+            $data = json_decode($content);
+            if(isset($data->error_description)) {
+                $this->_error = $data->error_description;
+            }
+            $this->_response_body = $content;
+
+        } catch (\Exception $exception) {
+
+        }
+
+        return (bool) ! $errmsg;
+    }
+
+
     //发送请求
     private function send($method,$data='') {
 
         $this->start_time = microtime(true);
 
         $matches = parse_url($this->_require_uri);
+
+        //print_r($matches); exit;
         !isset($matches['host']) && $matches['host'] = '';
         !isset($matches['path']) && $matches['path'] = '';
         !isset($matches['query']) && $matches['query'] = '';
@@ -195,6 +245,17 @@ class HttpClient {
         $host = $matches['host'];
         $path = $matches['path'] ? $matches['path'].($matches['query'] ? '?'.$matches['query'] : '') : '/';
         $port = $matches['port'] ? $matches['port']: 80;
+
+        if($matches["scheme"] == 'https') {
+            $port = 443;
+            $scheme = "ssl://";
+        } else {
+            $scheme = '';
+            $port = 80;
+        }
+
+        $port = getservbyname($matches["scheme"], 'tcp');
+        //print_r($service_port); exit;
         $this->_require_header['Host']= $host.($port == 80 ? '' :(':'.$port));
 
         if(!isset($this->_require_header['Referer']))  $this->_require_header['Referer'] = $this->_require_uri;
@@ -204,8 +265,10 @@ class HttpClient {
             $this->_error = socket_last_error();
         }
 
-        socket_set_option($sock,SOL_SOCKET,SO_RCVTIMEO,array("sec"=>$this->timeout, "usec"=>0 ) );
+       /* socket_set_option($sock,SOL_SOCKET,SO_RCVTIMEO,array("sec"=>$this->timeout, "usec"=>0 ) );
         socket_set_option($sock,SOL_SOCKET,SO_SNDTIMEO,array("sec"=>$this->timeout, "usec"=>0 ) );
+
+
 
         if( isset($this->_proxy_type) &&  $this->_proxy_type !=  HttpClient::PROXY_NONE ) {
             list ($proxy_host,$proxy_port) = explode(':',$this->_proxy_host);
@@ -267,14 +330,21 @@ class HttpClient {
             }
 
         }else {
-            if(!@socket_connect($sock,$host,$port)) {
+
+            if(!@socket_connect($sock,"tls://".$host,$port)) {
                 $this->_error = "Cann't connect to {$host}:{$port}";
                 return false;
             }
-        }
+        }*/
+
+       /* $sock = @fsockopen($scheme . $host, $port, $errno, $errstr, $this->timeout);
+        if(!$sock) {
+            $this->_error = "Cann't connect to {$scheme}{$host}:{$port}";
+            return false;
+        }*/
 
         //send data
-        $_method = strtoupper($method)." {$path} HTTP/1.0\r\n";
+        $_method = strtoupper($method)." {$path} HTTP/1.1\r\n";
         $data = $_method.$this->create_header()."\r\n".$data;
 
         socket_write($sock, $data);

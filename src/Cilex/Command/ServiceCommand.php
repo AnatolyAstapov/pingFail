@@ -175,6 +175,7 @@ class ServiceCommand extends Command
             $Slack  = new Client($slack->hook, $settings);
 
             $last_error = (string) @end($info)["last_error"];
+            $status_code = (string) @end($info)["status_code"];
 
             if(!$status) {
                 $data = [
@@ -183,11 +184,19 @@ class ServiceCommand extends Command
                     'color' => 'danger',
                     'fields' => [
                         [
-                            'title' => 'last error',
-                            'value' => $last_error
+                            'title' => 'Status code',
+                            'value' => $status_code
                         ],
                     ]
                 ];
+
+                if($last_error) {
+                    $data["fields"][] = [
+                        'title' => 'last error',
+                        'value' => $last_error
+                    ];
+                }
+
 
             } else {
 
