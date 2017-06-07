@@ -205,14 +205,14 @@ class HttpClient {
         $errmsg  = curl_error( $ch );
         $header  = curl_getinfo( $ch );
         $httpcode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close( $ch );
+
 
         $header['errno']   = $err;
         $this->_error = $errmsg;
 
         $this->_response_status = $httpcode;
         $this->_response_time = curl_getinfo($ch, CURLINFO_TOTAL_TIME);
-
+        curl_close( $ch );
 
         try {
 
